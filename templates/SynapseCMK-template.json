@@ -222,6 +222,19 @@
 					"Fn::Sub": "${AWS::Region}-${AWS::StackName}-SynapseDeploymentRoleArn"
 				}
 			}
+		},
+		"SynapseDeploymentRoleId": {
+			"Value": {
+				"Fn::GetAtt": [
+					"SynapseDeploymentRole",
+					"RoleId"
+				]
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::Region}-${AWS::StackName}-SynapseDeploymentRoleId"
+				}
+			}
 		}
 	}
 }
