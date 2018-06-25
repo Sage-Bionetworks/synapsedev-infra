@@ -56,7 +56,12 @@
 								},
 								{
 									"Effect": "Allow",
-									"Action": "elasticloadbalancing:DescribeLoadBalancers",
+									"Action": "elasticloadbalancing:*",
+									"Resource": "*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": "autoscaling:*",
 									"Resource": "*"
 								},
 								{
@@ -85,11 +90,16 @@
 										"iam:CreateRole",
 										"iam:DeleteRole",
 										"iam:UpdateRole",
+										"iam:GetRole",
+										"iam:PassRole",
 										"iam:CreateRolePolicy",
 										"iam:DeleteRolePolicy",
 										"iam:PutRolePolicy",
 										"iam:CreateInstanceProfile",
-										"iam:DeleteInstanceProfile"
+										"iam:DeleteInstanceProfile",
+										"iam:GetInstanceProfile",
+										"iam:RemoveRoleFromInstanceProfile",
+										"iam:AddRoleToInstanceProfile"
 									],
 									"Resource": "*"
 								},
@@ -144,16 +154,32 @@
 							],
 							"Resource": "*",
 							"Condition": {
-								"StringNotEquals": {
+								"StringNotLike": {
 									"aws:userid": [
 										{
-											"Fn::GetAtt": [
-												"SynapseDeploymentRole",
-												"RoleId"
+											"Fn::Join": [
+												"",
+												[
+													{
+														"Fn::GetAtt": [
+															"SynapseDeploymentRole",
+															"RoleId"
+														]
+													},
+													":*"
+												]
 											]
 										},
 										{
-											"Fn::ImportValue": "us-east-1-accounts-AWSIAMAdminRoleId"
+											"Fn::Join": [
+												"",
+												[
+													{
+														"Fn::ImportValue": "us-east-1-accounts-AWSIAMAdminRoleId"
+													},
+													":*"
+												]
+											]
 										},
 										{
 											"Ref": "AWS::AccountId"
@@ -166,18 +192,29 @@
 							"Sid": "Allow root administration of the key",
 							"Effect": "Allow",
 							"Principal": {
-								"AWS": {
-									"Fn::Join": [
-										"",
-										[
-											"arn:aws:iam::",
-											{
-												"Ref": "AWS::AccountId"
-											},
-											":root"
+								"AWS": [
+									{
+										"Fn::GetAtt": [
+											"SynapseDeploymentRole",
+											"Arn"
 										]
-									]
-								}
+									},
+									{
+										"Fn::ImportValue": "us-east-1-accounts-AWSIAMAdminRoleArn"
+									},
+									{
+										"Fn::Join": [
+											"",
+											[
+												"arn:aws:iam::",
+												{
+													"Ref": "AWS::AccountId"
+												},
+												":root"
+											]
+										]
+									}
+								]
 							},
 							"Action": [
 								"kms:*"
