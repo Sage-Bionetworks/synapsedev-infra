@@ -106,6 +106,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/PowerUserAccess
         - arn:aws:iam::aws:policy/IAMReadOnlyAccess
+        - !Ref AWSIAMEnforceMfaPolicy
   AWSIAMAdminRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -238,13 +239,6 @@ Resources:
             Condition:
               Bool:
                 'aws:MultiFactorAuthPresent': 'true'
-          - Sid: BlockAnyAccessOtherThanAboveUnlessSignedInWithMFA
-            Effect: Deny
-            NotAction: 'iam:*'
-            Resource: '*'
-            Condition:
-              BoolIfExists:
-                'aws:MultiFactorAuthPresent': 'false'
 Outputs:
   AWSIAMEnforceMfaPolicy:
     Value: !Ref AWSIAMEnforceMfaPolicy
