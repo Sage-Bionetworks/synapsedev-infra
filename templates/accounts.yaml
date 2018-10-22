@@ -161,6 +161,7 @@ Resources:
               - "iam:GetInstanceProfile"
               - "iam:RemoveRoleFromInstanceProfile"
               - "iam:AddRoleToInstanceProfile"
+              - "iam:AttachRolePolicy"
             Resource: "*"
 
   AWSIAMAdminRole:
