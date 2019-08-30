@@ -62,16 +62,6 @@ Resources:
       LoginProfile:
         Password: !Ref InitNewUserPassword
         PasswordResetRequired: true
-  AWSIAMKimyenLadiaUser:
-    Type: 'AWS::IAM::User'
-    Properties:
-      UserName: kimyen.ladia@sagebase.org
-      Groups:
-        - !Ref AWSIAMAllUsersGroup
-        - !Ref AWSIAMDeveloperUsersGroup
-      LoginProfile:
-        Password: !Ref InitNewUserPassword
-        PasswordResetRequired: true
   AWSIAMMikeKellenUser:
     Type: 'AWS::IAM::User'
     Properties:
