@@ -173,6 +173,13 @@
 										"glue:*"
 									],
 									"Resource": "*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"cloudfront:*"
+									],
+									"Resource": "*"
 								}
 							]
 						}
