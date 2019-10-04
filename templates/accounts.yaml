@@ -82,10 +82,10 @@ Resources:
       LoginProfile:
         Password: !Ref InitNewUserPassword
         PasswordResetRequired: true
-  AWSIAMNickGrosenbacherUser:
+  AWSIAMDwayneJengUser:
     Type: 'AWS::IAM::User'
     Properties:
-      UserName: nick.grosenbacher@sagebase.org
+      UserName: dwayne.jeng@sagebase.org
       Groups:
         - !Ref AWSIAMAllUsersGroup
         - !Ref AWSIAMDeveloperUsersGroup
