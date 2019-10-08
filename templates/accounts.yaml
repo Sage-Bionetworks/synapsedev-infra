@@ -178,6 +178,7 @@ Resources:
                 - !GetAtt AWSIAMXavierSchildwachterUser.Arn
                 - !GetAtt AWSIAMKhaiDoUser.Arn
                 - !GetAtt AWSIAMAaronHaydenUser.Arn
+                - !GetAtt AWSIAMMarcoMarascaUser.Arn
             Action:
               - "sts:AssumeRole"
       Path: "/"
