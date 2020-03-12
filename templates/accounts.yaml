@@ -185,11 +185,6 @@ Resources:
               - "iam:AddRoleToInstanceProfile"
               - "iam:AttachRolePolicy"
             Resource: "*"
-          -
-            Effect: "Allow"
-            Action:
-              - "waf-regional:PutLoggingConfiguration"
-            Resource: "*" 
 
   AWSIAMAdminRole:
     Type: "AWS::IAM::Role"
