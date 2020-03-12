@@ -145,6 +145,41 @@
 										"vpc:*"
 									],
 									"Resource": "*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"firehose:*"
+									],
+									"Resource": "*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"kinesis:*"
+									],
+									"Resource": "*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"es:*"
+									],
+									"Resource": "*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"glue:*"
+									],
+									"Resource": "*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"cloudfront:*"
+									],
+									"Resource": "*"
 								}
 							]
 						}
