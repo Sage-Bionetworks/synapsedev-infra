@@ -1,0 +1,121 @@
+Description: |
+  Creates an S3 bucket and a IAM user with access to it.
+  Intended for use with Synapse client integration tests that need to exercise
+  external storage functionality.
+
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: (Optional) the name of the S3 bucket to be created
+    Default: ''
+  SynapseAwsAccountId:
+    Type: String
+    Description: |
+      The AWS account id in which the Synapse stack is running that will interact with this bucket.
+    AllowedPattern: "[a-zA-Z0-9]+"
+  BucketIAMUserName:
+    Type: String
+    Description: |
+      IAM username for an IAM account to create that will have access to (only) the created bucket.
+    AllowedPattern: ".+"
+  LifecycleDataExpirationDays:
+    Type: Number
+    Description: Number of days (from creation) when objects are deleted from S3.
+    Default: 7
+
+Resources:
+
+  ExternalBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      CorsConfiguration:
+        CorsRules:
+          - Id: SynapseExternalBucketCORSRule
+            AllowedHeaders: ['*']
+            AllowedOrigins: ['*']
+            AllowedMethods: [GET, POST, PUT, HEAD]
+            MaxAge: 3000
+
+      # a bucket configured through this template is meant for running integration tests
+      # and its data is ephemeral, so we can aggressively expire anything left behind
+      # after running a test.
+      LifecycleConfiguration:
+        Rules:
+          - Id: DataLifecycleRule
+            Status: Enabled
+            ExpirationInDays: !Ref LifecycleDataExpirationDays
+
+  ExternalBucketIAMUser:
+    Type: AWS::IAM::User
+    Properties:
+      Policies:
+        - PolicyName: !Sub "${ExternalBucket}-access"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket*
+                  - s3:*Object*
+                  - s3:*MultipartUpload*
+                Resource:
+                  - !Sub "${ExternalBucket.Arn}"
+                  - !Sub "${ExternalBucket.Arn}/*"
+      UserName: !Ref BucketIAMUserName
+
+  BucketIAMUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName:
+        !Ref ExternalBucketIAMUser
+
+  ExternalBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ExternalBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Sid: ReadAccess
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Ref SynapseAwsAccountId
+                - !GetAtt ExternalBucketIAMUser.Arn
+            Action: s3:ListBucket*
+            Resource: !GetAtt ExternalBucket.Arn
+          -
+            Sid: WriteAccess
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Ref SynapseAwsAccountId
+                - !GetAtt ExternalBucketIAMUser.Arn
+            Action:
+              - s3:*Object*
+              - s3:*MultipartUpload*
+            Resource: !Sub "${ExternalBucket.Arn}/*"
+
+Outputs:
+  ExternalBucket:
+    Value: !Ref ExternalBucket
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-ExternalBucket'
+
+  ExternalBucketIAMUserArn:
+    Value: !GetAtt ExternalBucketIAMUser.Arn
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-ExternalBucketIAMUserArn'
+
+  # this will output the access key secret and it will be viewable by anyone who can view
+  # the cloudforomation stack outputs. however this user only has access to the specific
+  # bucket, which will only contain ephemeral test generated data and nothing sensitive.
+  AccessKeyBucketIAMUser:
+    Value:
+      !Ref BucketIAMUserAccessKey
+  SecretKeyBucketIAMUser:
+    Value: !GetAtt BucketIAMUserAccessKey.SecretAccessKey

@@ -143,33 +143,6 @@ Resources:
         Password: !Ref InitNewUserPassword
         PasswordResetRequired: true
 
-  # an IAM user and access key for use in integration test.
-  # will have access to an S3 bucket that can be used in tests
-  # of external S3 bucket functionality.
-  AWSIAMSynapseDevClientIntegrationTestUser:
-    Type: 'AWS::IAM::User'
-    Properties:
-      UserName: synapse-dev-client-integration-test-user
-      Policies:
-        - PolicyName: synapse-dev-client-integration-test-s3-access
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:ListBucket*
-                  - s3:*Object*
-                  - s3:*MultipartUpload*
-                Resource:
-                  - arn:aws:s3:::synapse-dev-client-integration-test*
-                  - arn:aws:s3:::synapse-dev-client-integration-test*/*
-
-  AWSIAMSynapseDevClientIntegrationTestUserAccessKey:
-    Type: 'AWS::IAM::AccessKey'
-    Properties:
-      UserName:
-        !Ref AWSIAMSynapseDevClientIntegrationTestUser
-
   AWSIAMDeveloperUsersGroup:
     Type: 'AWS::IAM::Group'
     Properties:
@@ -371,11 +344,3 @@ Outputs:
     Value: !GetAtt AWSIAMAdminRole.RoleId
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-AWSIAMAdminRoleId'
-
-  # this will output the access key secret and it will be viewable by anyone who can view
-  # the cloudforomation stack outputs. however this user only has access to the specific
-  # bucket, which will only contain ephemeral test generated data and nothing sensitive.
-  AWSIAMSynapseDevClientIntegrationTestUserAccessKey:
-    Value: !Ref AWSIAMSynapseDevClientIntegrationTestUserAccessKey
-  AWSIAMSynapseDevClientIntegrationTestUserSecretAccessKey:
-    Value: !GetAtt AWSIAMSynapseDevClientIntegrationTestUserAccessKey.SecretAccessKey

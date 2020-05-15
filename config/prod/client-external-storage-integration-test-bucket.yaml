@@ -1,0 +1,12 @@
+# bucket and user for client integration tests of external storage locations.
+
+# http://docs.synapse.org/articles/custom_storage_location.html
+template_path: client-external-storage-integration-test-bucket.yaml
+stack_name: client-external-storage-integration-test-bucket
+
+parameters:
+  BucketName: 'synapse-dev-external-storage-tests'
+  BucketIAMUserName: 'synapse-dev-external-bucket-test-user'
+
+  # synapse dev AWS account where the dev stack runs
+  SynapseAwsAccountId: '449435941126'
