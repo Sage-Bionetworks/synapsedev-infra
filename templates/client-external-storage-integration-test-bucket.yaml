@@ -51,19 +51,6 @@ Resources:
   ExternalBucketIAMUser:
     Type: AWS::IAM::User
     Properties:
-      Policies:
-        - PolicyName: !Sub "${ExternalBucket}-access"
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:ListBucket*
-                  - s3:*Object*
-                  - s3:*MultipartUpload*
-                Resource:
-                  - !Sub "${ExternalBucket.Arn}"
-                  - !Sub "${ExternalBucket.Arn}/*"
       UserName: !Ref BucketIAMUserName
 
   BucketIAMUserAccessKey:
