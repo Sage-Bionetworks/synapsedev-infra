@@ -1,7 +1,7 @@
 Description: |
-  Creates an S3 bucket and a IAM user with access to it.
-  Intended for use with Synapse client integration tests that need to exercise
-  external storage functionality.
+  Creates resources associated with running client integration tests.
+  Creates an S3 bucket to serve as a external storage location as well
+  as an IAM user with access to that bucket.
 
 AWSTemplateFormatVersion: 2010-09-09
 
@@ -10,27 +10,32 @@ Parameters:
     Type: String
     Description: (Optional) the name of the S3 bucket to be created
     Default: ''
-  SynapseAwsAccountId:
+  AwsAccountId:
     Type: String
     Description: |
-      The AWS account id in which the Synapse stack is running that will interact with this bucket.
-    AllowedPattern: "[a-zA-Z0-9]+"
-  BucketIAMUserName:
+      (Optional) The AWS account id in which the Synapse stack is running that will interact with this bucket.
+      Defaults to the AWS account id running this template.
+  UserName:
     Type: String
     Description: |
       IAM username for an IAM account to create that will have access to (only) the created bucket.
-    AllowedPattern: ".+"
   LifecycleDataExpirationDays:
     Type: Number
     Description: Number of days (from creation) when objects are deleted from S3.
     Default: 7
 
+Conditions:
+  HasBucketName: !Not [!Equals [!Ref BucketName, ""]]
+  HasAccountId: !Not [!Equals [!Ref AwsAccountId, ""]]
+  HasUserName: !Not [!Equals [!Ref UserName, ""]]
+
 Resources:
 
+  # an S3 bucket configured such that it can be used as a custom Synapse external storage location
   ExternalBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Ref BucketName
+      BucketName: !If [HasBucketName, !Ref BucketName, !Ref 'AWS::NoValue']
       CorsConfiguration:
         CorsRules:
           - Id: SynapseExternalBucketCORSRule
@@ -48,16 +53,33 @@ Resources:
             Status: Enabled
             ExpirationInDays: !Ref LifecycleDataExpirationDays
 
-  ExternalBucketIAMUser:
+  # IAM user with access to resources in this template (i.e. the S3 bucket)
+  ClientTestUser:
     Type: AWS::IAM::User
     Properties:
-      UserName: !Ref BucketIAMUserName
+      UserName: !If [HasUserName, !Ref UserName, !Ref 'AWS::NoValue']
 
-  BucketIAMUserAccessKey:
+  ClientTestUserPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: synapse-client-test-policy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:*
+            Resource:
+              - !Sub "${ExternalBucket.Arn}"
+              - !Sub "${ExternalBucket.Arn}/*"
+      Users:
+        - !Ref ClientTestUser
+
+  ClientTestUserAccessKey:
     Type: AWS::IAM::AccessKey
     Properties:
       UserName:
-        !Ref ExternalBucketIAMUser
+        !Ref ClientTestUser
 
   ExternalBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -70,18 +92,14 @@ Resources:
             Sid: ReadAccess
             Effect: Allow
             Principal:
-              AWS:
-                - !Ref SynapseAwsAccountId
-                - !GetAtt ExternalBucketIAMUser.Arn
+              AWS: !If [HasAccountId, !Ref AwsAccountId, !Ref "AWS::AccountId"]
             Action: s3:ListBucket*
             Resource: !GetAtt ExternalBucket.Arn
           -
             Sid: WriteAccess
             Effect: Allow
             Principal:
-              AWS:
-                - !Ref SynapseAwsAccountId
-                - !GetAtt ExternalBucketIAMUser.Arn
+              AWS: !If [HasAccountId, !Ref AwsAccountId, !Ref "AWS::AccountId"]
             Action:
               - s3:*Object*
               - s3:*MultipartUpload*
@@ -93,16 +111,16 @@ Outputs:
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-ExternalBucket'
 
-  ExternalBucketIAMUserArn:
-    Value: !GetAtt ExternalBucketIAMUser.Arn
+  ClientTestUserArn:
+    Value: !GetAtt ClientTestUser.Arn
     Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-ExternalBucketIAMUserArn'
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-ClientTestUserArn'
 
   # this will output the access key secret and it will be viewable by anyone who can view
   # the cloudforomation stack outputs. however this user only has access to the specific
   # bucket, which will only contain ephemeral test generated data and nothing sensitive.
-  AccessKeyBucketIAMUser:
+  ClientTestUserAccessKeyId:
     Value:
-      !Ref BucketIAMUserAccessKey
-  SecretKeyBucketIAMUser:
-    Value: !GetAtt BucketIAMUserAccessKey.SecretAccessKey
+      !Ref ClientTestUserAccessKey
+  ClientTestUserSecret:
+    Value: !GetAtt ClientTestUserAccessKey.SecretAccessKey
