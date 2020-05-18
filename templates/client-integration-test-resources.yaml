@@ -15,10 +15,12 @@ Parameters:
     Description: |
       (Optional) The AWS account id in which the Synapse stack is running that will interact with this bucket.
       Defaults to the AWS account id running this template.
+    Default: ''
   UserName:
     Type: String
     Description: |
-      IAM username for an IAM account to create that will have access to (only) the created bucket.
+      (Optional) IAM username for an IAM account to create that will have access to (only) the created bucket.
+    Default: ''
   LifecycleDataExpirationDays:
     Type: Number
     Description: Number of days (from creation) when objects are deleted from S3.
