@@ -77,11 +77,11 @@ Resources:
       Users:
         - !Ref ClientTestUser
 
-  ClientTestUserAccessKey:
-    Type: AWS::IAM::AccessKey
-    Properties:
-      UserName:
-        !Ref ClientTestUser
+  #  ClientTestUserAccessKey:
+  #    Type: AWS::IAM::AccessKey
+  #    Properties:
+  #      UserName:
+  #        !Ref ClientTestUser
 
   ExternalBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -118,11 +118,11 @@ Outputs:
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-ClientTestUserArn'
 
-  # this will output the access key secret and it will be viewable by anyone who can view
-  # the cloudforomation stack outputs. however this user only has access to the specific
-  # bucket, which will only contain ephemeral test generated data and nothing sensitive.
-  ClientTestUserAccessKeyId:
-    Value:
-      !Ref ClientTestUserAccessKey
-  ClientTestUserSecret:
-    Value: !GetAtt ClientTestUserAccessKey.SecretAccessKey
+#  # this will output the access key secret and it will be viewable by anyone who can view
+#  # the cloudforomation stack outputs. however this user only has access to the specific
+#  # bucket, which will only contain ephemeral test generated data and nothing sensitive.
+#  ClientTestUserAccessKeyId:
+#    Value:
+#      !Ref ClientTestUserAccessKey
+#  ClientTestUserSecret:
+#    Value: !GetAtt ClientTestUserAccessKey.SecretAccessKey
