@@ -141,7 +141,7 @@ Resources:
       LoginProfile:
         Password: !Ref InitNewUserPassword
         PasswordResetRequired: true
-   AWSIAMNicolettaGilbertsonUser:
+  AWSIAMNicolettaGilbertsonUser:
     Type: 'AWS::IAM::User'
     Properties:
       UserName: nicoletta.gilbertson@sagebase.org
