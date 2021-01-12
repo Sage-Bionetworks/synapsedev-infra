@@ -67,6 +67,10 @@ Outputs:
     Value: !GetAtt SynapseDevAdminSamlProviderRole.Arn
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-SynapseDevAdminSamlProviderRoleArn'
+  SynapseDevAdminSamlProviderRoleId:
+    Value: !GetAtt SynapseDevAdminSamlProviderRole.RoleId
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-SynapseDevAdminSamlProviderRoleId'
   SynapseDevDeveloperSamlProviderArn:
     Value: !Ref SynapseDevDeveloperSamlProvider
     Export:
@@ -75,3 +79,7 @@ Outputs:
     Value: !GetAtt SynapseDevDeveloperSamlProviderRole.Arn
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-SynapseDevDeveloperSamlProviderRoleArn'
+  SynapseDevDeveloperSamlProviderRoleId:
+    Value: !GetAtt SynapseDevDeveloperSamlProviderRole.RoleId
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-SynapseDevDeveloperSamlProviderRoleId'
