@@ -180,6 +180,13 @@
                                         "cloudfront:*"
                                     ],
                                     "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "sts:*"
+                                    ],
+                                    "Resource": "*"
                                 }
                             ]
                         }
